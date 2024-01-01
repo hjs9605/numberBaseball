@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NumberBS Game</title>
+</head>
+<body>
+<h1>NumberBS Game</h1>
+
+<button id="createRoom">방 만들기</button>
+<button onclick=joinRoomPrompt()>방 입장하기</button>
+
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+<script>
+
+    var roomCode = null;
+
+    $("#createRoom").on("click", function () {
+        // AJAX GET 요청 보내기
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/createRoom",// 실제 서버의 GET Mapping 경로로 대체
+            success: function (data) {
+                // 성공적으로 응답을 받았을 때의 처리
+                console.log("Response:", data);
+                roomCode = data.roomCode;
+                location.replace("http://localhost:8080/room/"+roomCode);
+            }
+        });
+    });
+
+    $("#joinRoom").on("click", function () {
+        // AJAX GET 요청 보내기
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/createRoom",// 실제 서버의 GET Mapping 경로로 대체
+            success: function (data) {
+                // 성공적으로 응답을 받았을 때의 처리
+                console.log("Response:", data);
+                roomCode = data.roomCode;
+                location.replace("http://localhost:8080/room/"+roomCode);
+            }
+        });
+    });
+    function joinRoomPrompt() {
+        var roomCode2 = prompt("방 코드를 입력하세요:");
+        if (roomCode2) {
+            joinRoom(roomCode2);
+        }
+    }
+
+    function joinRoom(roomCode) {
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8080/api/joinRoom/"+roomCode,// 실제 서버의 GET Mapping 경로로 대체
+            success: function (data) {
+                // 성공적으로 응답을 받았을 때의 처리
+                console.log("Response:", data);
+                roomCode = data.roomCode;
+                location.replace("http://localhost:8080/room/"+roomCode);
+            }
+
+        })
+            .fail(function (jqXHR, textStatus) {
+            const errorMessage = jqXHR.responseText;
+            alert(`${errorMessage}`);
+        });
+    }
+
+    // connect();
+</script>
+</body>
+</html>
