@@ -1,28 +1,18 @@
 package com.example.numberbaseball.controller;
 
-import com.example.numberbaseball.Enum.RoomStatus;
-import com.example.numberbaseball.domain.Room;
-import com.example.numberbaseball.domain.User;
-import com.example.numberbaseball.domain.UserNumber;
-import com.example.numberbaseball.dto.*;
-import com.example.numberbaseball.repository.NumberRepository;
-import com.example.numberbaseball.repository.RoomRepository;
-import com.example.numberbaseball.repository.UserRepository;
-import com.example.numberbaseball.service.GameService;
-import com.example.numberbaseball.vo.BaseBallNumber;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.lang.Nullable;
-import org.springframework.messaging.MessageHeaders;
+import java.security.Principal;
+
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageType;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
-import java.security.Principal;
+import com.example.numberbaseball.dto.EnterRoomPayloadDTO;
+import com.example.numberbaseball.dto.NumberGuessDTO;
+import com.example.numberbaseball.dto.NumberResponseDTO;
+import com.example.numberbaseball.service.GameService;
+
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequiredArgsConstructor

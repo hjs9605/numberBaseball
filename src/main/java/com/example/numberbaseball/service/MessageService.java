@@ -11,8 +11,10 @@ import org.springframework.stereotype.Service;
 import com.example.numberbaseball.Enum.RoomStatus;
 import com.example.numberbaseball.domain.User;
 import com.example.numberbaseball.dto.Message;
+import com.example.numberbaseball.dto.NumberResponseDTO;
 import com.example.numberbaseball.dto.NumberScoreDTO;
 import com.example.numberbaseball.dto.UserResponseDTO;
+import com.example.numberbaseball.vo.BaseBallNumber;
 
 import lombok.RequiredArgsConstructor;
 
@@ -48,6 +50,13 @@ public class MessageService {
 		);
 	}
 
+	public void sendErrorMessage(String sessionId, Exception e){
+		messagingTemplate.convertAndSendToUser(
+			sessionId, "/topic/errors",
+			e.getMessage(), createHeaders(sessionId)
+		);
+	}
+
 	private MessageHeaders createHeaders(@Nullable String sessionId) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (sessionId != null) headerAccessor.setSessionId(sessionId);
@@ -64,5 +73,15 @@ public class MessageService {
 			"/topic/score/"+roomCode,
 			new NumberScoreDTO(user, number, score)
 		);
+	}
+
+	public void sendRestartGame(String sessionId, String userName, String roomCode) {
+		messagingTemplate.convertAndSendToUser(sessionId, "/topic/error/startGame",
+			new UserResponseDTO(sessionId, userName, roomCode, true), createHeaders(sessionId));
+	}
+
+	public void sendYourSecretNumber(String sessionId, String number, String roomCode) {
+		messagingTemplate.convertAndSendToUser(sessionId, "/topic/showNumber",
+			new NumberResponseDTO(sessionId, number, roomCode), createHeaders(sessionId));
 	}
 }

@@ -4,24 +4,56 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NumberBS Game</title>
+    <style>
+        #container {
+            display: flex;
+            justify-content: space-between;
+            width: 80%; /* 조절 가능한 너비 */
+            margin-top: 20px;
+        }
+
+        #leftColumn, #rightColumn {
+            flex: 1;
+            padding: 10px;
+        }
+
+
+
+        #inputField {
+            width: 10%;
+            padding: 5px;
+        }
+
+        #sendButton {
+            margin-left: 10px;
+            padding: 5px;
+        }
+    </style>
+    <title>Number Baseball Game</title>
 </head>
 <body>
-<h1>PLAY Number Base Ball GAME!!</h1>
-
+<h1>PLAY Number Baseball GAME!!</h1>
 <div>---------------------------------------</div>
 <div id="enterNotice"></div>
 <div id="greetingNotice"></div>
 <div id="waitNotice"></div>
 <div>---------------------------------------</div>
-<div id="myNumberDisplay"></div>
-<div>---------------------------------------</div>
-<div id="turnNotice"></div>
-
-<div>
-    <input type="text" id="inputField" placeholder="예상하는 숫자를 써주세요!">
-    <button id="sendButton" onclick="sendMessage()">Send</button>
+<div id="container">
+    <div id="leftColumn">
+        <div id="myNumberDisplay"></div>
+        <div>---------------------------------------</div>
+        <div id="turnNotice"></div>
+        <div id="inputContainer">
+            <input type="text" id="inputField" placeholder="예상하는 숫자를 써주세요!">
+            <button id="sendButton" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <div id="rightColumn">
+        <div id="endDisplay">
+        </div>
+    </div>
 </div>
+
 <style>
     .guess-row:nth-child(even) {
         background-color: #ffffcc; /* 연한 노랑색 배경 설정 */
@@ -122,6 +154,15 @@
             alert(`${errorMessage}`);
         });
 
+        stompClient.subscribe('/user/topic/win', function (res){
+            document.getElementById("endDisplay").innerHTML =
+                '<img src="../static/images/winner.png">'
+        });
+
+        stompClient.subscribe('/user/topic/lose', function (res){
+            document.getElementById("endDisplay").innerHTML =
+                '<img src="../static/images/lose.png">'
+        });
     }
 
     function getUserName() {
