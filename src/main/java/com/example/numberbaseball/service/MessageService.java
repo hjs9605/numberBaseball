@@ -65,4 +65,11 @@ public class MessageService {
 			new NumberScoreDTO(user, number, score)
 		);
 	}
+
+
+	public void sendWaitForCounterUserReady(User user, String counterUserName) {
+		messagingTemplate.convertAndSendToUser(
+				user.getSessionId(), "/topic/waitReady", new Message(counterUserName +"이 아직 숫자를 정하고 있습니다"), createHeaders(user.getSessionId())
+		);
+	}
 }

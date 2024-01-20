@@ -86,7 +86,19 @@
             console.log(jsonBody2);
             console.log("---각자 설정한 숫자 보여줌 ---"+jsonBody2.sessionId);
             document.getElementById("myNumberDisplay").innerText = "내가 설정한 숫자는 " + jsonBody2.number.number + " 입니다";
+            document.getElementById("inputField").disabled = true;
+            document.getElementById("sendButton").disabled = true;
+            stompClient.send("/app/readyAll", {},JSON.stringify({sessionId:sessionId, userName: userName, roomCode: roomCode}));
         });
+
+        // 상대가 숫자 정하지않으면 기다리라고함
+        stompClient.subscribe("/user/topic/waitReady", function (response) {
+            var jsonBody = JSON.parse(response.body);
+
+            document.getElementById("turnNotice").innerText= jsonBody.message;
+
+        });
+
         // 숫자 추측 후 결과 보여줌
         stompClient.subscribe(scoreTopic, function (res) {
             var jsonBody4 = JSON.parse(res.body);
@@ -105,6 +117,7 @@
             document.getElementById("inputField").disabled = true;
             document.getElementById("sendButton").disabled = true;
             var jsonBody5 = JSON.parse(res.body);
+            console.log(jsonBody5.message)
             document.getElementById("turnNotice").innerText = jsonBody5.message;
         });
         // 니 차례세요
