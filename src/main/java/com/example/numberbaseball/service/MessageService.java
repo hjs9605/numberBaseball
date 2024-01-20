@@ -9,7 +9,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.numberbaseball.Enum.RoomStatus;
+import com.example.numberbaseball.domain.User;
 import com.example.numberbaseball.dto.Message;
+import com.example.numberbaseball.dto.NumberScoreDTO;
 import com.example.numberbaseball.dto.UserResponseDTO;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,19 @@ public class MessageService {
 		);
 	}
 
+	public void sendNotYourTurnMessage(User user, User counterUser){
+		messagingTemplate.convertAndSendToUser(
+			user.getSessionId(), "/topic/turnNotNow",
+			new Message(counterUser.getUserName()  + "님의 차례입니다."), createHeaders(user.getSessionId())
+		);
+	}
+	public void sendYourTurnMessage(User user){
+		messagingTemplate.convertAndSendToUser(
+			user.getSessionId(), "/topic/turnNow",
+			new Message(user.getUserName()  + "님의 차례입니다."), createHeaders(user.getSessionId())
+		);
+	}
+
 	private MessageHeaders createHeaders(@Nullable String sessionId) {
 		SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
 		if (sessionId != null) headerAccessor.setSessionId(sessionId);
@@ -42,5 +57,12 @@ public class MessageService {
 
 	public void sendCounterUserEnteredRoomMessage(String receiverSessionId, String incomingUserName) {
 		messagingTemplate.convertAndSendToUser(receiverSessionId, "/topic/greeting", new Message(incomingUserName + "이 입장하셨습니다."), createHeaders(receiverSessionId));
+	}
+
+	public void sendGuessResultMessage(User user,String roomCode, String number, int[] score) {
+		messagingTemplate.convertAndSend(
+			"/topic/score/"+roomCode,
+			new NumberScoreDTO(user, number, score)
+		);
 	}
 }
