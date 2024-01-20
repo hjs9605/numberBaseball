@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 @NoArgsConstructor
 public class PageController {
 
+    @GetMapping("/")
+    public String mainBuilder(){
+        return "mainPage";
+    }
     @GetMapping("/main")
-    public String mainBuilder() {
+    public String mainBuilder2() {
         return "mainPage";
     }
 
