@@ -22,7 +22,15 @@
     <input type="text" id="inputField" placeholder="예상하는 숫자를 써주세요!">
     <button id="sendButton" onclick="sendMessage()">Send</button>
 </div>
+<style>
+    .guess-row:nth-child(even) {
+        background-color: #ffffcc; /* 연한 노랑색 배경 설정 */
+    }
 
+    .guess-row:nth-child(odd) {
+        background-color: #ffffff; /* 홀수 행에 대한 배경색 설정 (배경 없음) */
+    }
+</style>
 <div id="guessDisplay">
 
 </div>
@@ -33,6 +41,7 @@
     var stompClient = null;
     var userName = null;
     var sessionId = null;
+
     // 현재 URL에서 path variable 값을 가져옴
     var roomCode = window.location.pathname.split('/').pop();
     var enterNoticeElement = document.getElementById("enterNotice");
@@ -79,8 +88,11 @@
             console.log(jsonBody4);
 
             console.log("---추측 결과 보여줌 ---"+jsonBody4.sessionId);
-            document.getElementById("guessDisplay").innerText += jsonBody4.userName + " 님의 결과 :::  " + jsonBody4.guessNumber + " ----->" + jsonBody4.str +
-                "  STRIKE  " + jsonBody4.ball + "  BALL  " + jsonBody4.out + "  OUT\n";
+            var guessRow = document.createElement('div');
+            guessRow.className = 'guess-row';
+            guessRow.innerText = jsonBody4.userName + " 님의 결과 :::  " + jsonBody4.guessNumber + " ----->" + jsonBody4.str +
+                "  STRIKE  " + jsonBody4.ball + "  BALL  " + jsonBody4.out + "  OUT";
+            document.getElementById("guessDisplay").appendChild(guessRow);
 
         });
         // 기다리세요
