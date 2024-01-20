@@ -33,101 +33,98 @@
     var stompClient = null;
     var userName = null;
     var sessionId = null;
-
     // 현재 URL에서 path variable 값을 가져옴
     var roomCode = window.location.pathname.split('/').pop();
     var enterNoticeElement = document.getElementById("enterNotice");
 
-    function connect() {
+    var waitingTopic = "/user/topic/waiting/"
+    var startTopic = "/user/topic/startGame";
+    var scoreTopic = "/topic/score/"+roomCode;
+
+    function subscribeEvents(stompClient){
+
+        var greetingMessage = userName + "이 " + roomCode + "에 입장하셨습니다.";
+        enterNoticeElement.innerHTML += '<div>'+greetingMessage +'</div>';
+        // 입장처리 후 user 저장, Room status
+        enterRoom()
+        // game 시작되어서 숫자 설정하는 부분
+        stompClient.subscribe(waitingTopic, function (res) {
+            console.log("--- 기다릴게요  ---" );
+            waiting();
+        });
+        // game 시작되어서 숫자 설정하는 부분
+        stompClient.subscribe(startTopic, function (response) {
+            var jsonBody = JSON.parse(response.body);
+            console.log(jsonBody)
+            console.log("---숫자 설정할게요 ---" + jsonBody.sessionId);
+            setNumber(jsonBody.sessionId, jsonBody.userName, jsonBody.roomCode);
+        });
+        // 오류 난다면 각자는 여기로 와서 숫자 다시 설정하세요
+        stompClient.subscribe("/user/topic/error/startGame", function (response) {
+            var jsonBody = JSON.parse(response.body);
+            console.log("---오류나서 숫자 다시설정 ---"+jsonBody.sessionId);
+            setNumber(jsonBody.sessionId, jsonBody.userName, jsonBody.roomCode);
+        });
+        // 숫자 설정 완료 후 각자가 설정한 숫자 보여줌
+        stompClient.subscribe("/user/topic/showNumber", function (response2) {
+            var jsonBody2 = JSON.parse(response2.body);
+            console.log(jsonBody2);
+            console.log("---각자 설정한 숫자 보여줌 ---"+jsonBody2.sessionId);
+            document.getElementById("myNumberDisplay").innerText = "내가 설정한 숫자는 " + jsonBody2.number.number + " 입니다";
+
+        });
+        // 숫자 추측 후 결과 보여줌
+        stompClient.subscribe(scoreTopic, function (res) {
+            var jsonBody4 = JSON.parse(res.body);
+            console.log(jsonBody4);
+
+            console.log("---추측 결과 보여줌 ---"+jsonBody4.sessionId);
+            document.getElementById("guessDisplay").innerText += jsonBody4.userName + " 님의 결과 :::  " + jsonBody4.guessNumber + " ----->" + jsonBody4.str +
+                "  STRIKE  " + jsonBody4.ball + "  BALL  " + jsonBody4.out + "  OUT\n";
+
+        });
+        // 기다리세요
+        stompClient.subscribe("/user/topic/turnNotNow", function (res) {
+            document.getElementById("inputField").disabled = true;
+            document.getElementById("sendButton").disabled = true;
+            var jsonBody5 = JSON.parse(res.body);
+            document.getElementById("turnNotice").innerText = jsonBody5.message;
+        });
+        // 니 차례세요
+        stompClient.subscribe("/user/topic/turnNow", function (res) {
+            document.getElementById("inputField").disabled = false;
+            document.getElementById("sendButton").disabled = false;
+            var jsonBody5 = JSON.parse(res.body);
+            document.getElementById("turnNotice").innerText = jsonBody5.message;
+        });
+        // 에러 처리
+        stompClient.subscribe('/user/topic/errors', function (error) {
+            // 에러 메시지 처리
+            console.error('Error received:', error.body);
+            const errorMessage = error.body;
+            alert(`${errorMessage}`);
+        });
+
+    }
+
+    function getUserName() {
+        return new Promise((resolve) => {
+            const userName = prompt("닉네임을 입력하세요");
+            resolve(userName);
+        });
+    }
+    async function connect() {
+        // 연결 되자마자 닉네임 받기
+        userName = await getUserName()
         var socket = new SockJS("/ws");
         stompClient = Stomp.over(socket);
-
-        // 연결 되자마자 닉네임 받기
-        userName = prompt("닉네임을 입력하세요");
-
-
         stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-
-            enterNoticeElement.innerHTML += '<div>' + userName + "이 " + roomCode + "에 입장하셨습니다." + '</div>';
-            // 입장처리 후 user 저장, Room status
-            enterRoom()
-
-            // game 시작되어서 숫자 설정하는 부분
-            var waitingTopic = "/user/topic/waiting/"
-            stompClient.subscribe(waitingTopic, function (res) {
-                console.log("--- 기다릴게요  ---" );
-                waiting();
-            });
-
-            // game 시작되어서 숫자 설정하는 부분
-            var startTopic = "/user/topic/startGame";
-            stompClient.subscribe(startTopic, function (response) {
-                var jsonBody = JSON.parse(response.body);
-                console.log(jsonBody)
-                console.log("---숫자 설정할게요 ---" + jsonBody.sessionId);
-                setNumber(jsonBody.sessionId, jsonBody.userName, jsonBody.roomCode);
-            });
-
-
-            // 오류 난다면 각자는 여기로 와서 숫자 다시 설정하세요
-            stompClient.subscribe("/user/topic/error/startGame", function (response) {
-                var jsonBody = JSON.parse(response.body);
-                console.log("---오류나서 숫자 다시설정 ---"+jsonBody.sessionId);
-                setNumber(jsonBody.sessionId, jsonBody.userName, jsonBody.roomCode);
-            });
-
-            // 숫자 설정 완료 후 각자가 설정한 숫자 보여줌
-            stompClient.subscribe("/user/topic/showNumber", function (response2) {
-                var jsonBody2 = JSON.parse(response2.body);
-                console.log(jsonBody2);
-                console.log("---각자 설정한 숫자 보여줌 ---"+jsonBody2.sessionId);
-                document.getElementById("myNumberDisplay").innerText = "내가 설정한 숫자는 " + jsonBody2.number.number + " 입니다";
-
-            });
-
-            var scoreTopic = "/topic/score/"+roomCode;
-            // 숫자 추측 후 결과 보여줌
-            stompClient.subscribe(scoreTopic, function (res) {
-                var jsonBody4 = JSON.parse(res.body);
-                console.log(jsonBody4);
-
-                console.log("---추측 결과 보여줌 ---"+jsonBody4.sessionId);
-                document.getElementById("guessDisplay").innerText += jsonBody4.userName + " 님의 결과 :::  " + jsonBody4.guessNumber + " ----->" + jsonBody4.str +
-                    "  STRIKE  " + jsonBody4.ball + "  BALL  " + jsonBody4.out + "  OUT\n";
-
-            });
-
-            // 기다리세요
-            stompClient.subscribe("/user/topic/turnNotNow", function (res) {
-                document.getElementById("inputField").disabled = true;
-                document.getElementById("sendButton").disabled = true;
-                var jsonBody5 = JSON.parse(res.body);
-                document.getElementById("turnNotice").innerText = jsonBody5.message;
-            });
-
-            // 니 차례세요
-            stompClient.subscribe("/user/topic/turnNow", function (res) {
-                document.getElementById("inputField").disabled = false;
-                document.getElementById("sendButton").disabled = false;
-                var jsonBody5 = JSON.parse(res.body);
-                document.getElementById("turnNotice").innerText = jsonBody5.message;
-            });
-            // 에러 처리
-            stompClient.subscribe('/user/topic/errors', function (error) {
-                // 에러 메시지 처리
-                console.error('Error received:', error.body);
-                const errorMessage = error.body;
-                alert(`${errorMessage}`);
-            });
-
+            subscribeEvents(stompClient);
         })
     }
 
     function enterRoom() {
-
         stompClient.send("/app/enterRoom", {}, JSON.stringify({userName: userName, roomCode: roomCode}));
-
     }
     function waiting() {
         console.log("setNumber waiting");
