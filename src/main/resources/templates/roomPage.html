@@ -11,7 +11,7 @@
 
 <div>---------------------------------------</div>
 <div id="enterNotice"></div>
-
+<div id="greetingNotice"></div>
 <div id="waitNotice"></div>
 <div>---------------------------------------</div>
 <div id="myNumberDisplay"></div>
@@ -46,8 +46,9 @@
     var roomCode = window.location.pathname.split('/').pop();
     var enterNoticeElement = document.getElementById("enterNotice");
 
-    var waitingTopic = "/user/topic/waiting/"
+    var waitingTopic = "/user/topic/waiting/";
     var startTopic = "/user/topic/startGame";
+    var greetingTopic = "/user/topic/greeting";
     var scoreTopic = "/topic/score/"+roomCode;
 
     function subscribeEvents(stompClient){
@@ -56,6 +57,11 @@
         enterNoticeElement.innerHTML += '<div>'+greetingMessage +'</div>';
         // 입장처리 후 user 저장, Room status
         enterRoom()
+
+        stompClient.subscribe(greetingTopic, function(res) {
+            console.log("--- 친구가 들어왔어요 ---");
+            printGreetingMessage(JSON.parse(res.body).message);
+        });
         // game 시작되어서 숫자 설정하는 부분
         stompClient.subscribe(waitingTopic, function (res) {
             console.log("--- 기다릴게요  ---" );
@@ -80,7 +86,6 @@
             console.log(jsonBody2);
             console.log("---각자 설정한 숫자 보여줌 ---"+jsonBody2.sessionId);
             document.getElementById("myNumberDisplay").innerText = "내가 설정한 숫자는 " + jsonBody2.number.number + " 입니다";
-
         });
         // 숫자 추측 후 결과 보여줌
         stompClient.subscribe(scoreTopic, function (res) {
@@ -143,21 +148,26 @@
         document.getElementById("inputField").disabled = true;
         document.getElementById("waitNotice").innerText = "상대방에게 ROOM CODE를 공유하세요 : " +roomCode;
     }
+
+    function printGreetingMessage(message){
+        console.log(message);
+        document.getElementById("greetingNotice").innerText = message;
+    }
+
     function setNumber(sessionId, clientName, roomCode) {
         console.log("setNumber excuted");
 
-        var number = prompt("게임이 시작되었습니다. 설정할 세자리 숫자를 입력하세요");
-        document.getElementById("inputField").disabled = false;
-        document.getElementById("waitNotice").innerText = "게임이 시작되었습니다.";
-        console.log(clientName + "set number" + number);
-        stompClient.send('/app/setNumber', {}, JSON.stringify({
-            sessionId: sessionId,
-            number: number,
-            roomCode: roomCode
-        }));
-
-
-
+        setTimeout(function () {
+            var number = prompt("게임이 시작되었습니다. 설정할 세자리 숫자를 입력하세요");
+            document.getElementById("inputField").disabled = false;
+            document.getElementById("waitNotice").innerText = "게임이 시작되었습니다.";
+            console.log(clientName + "set number" + number);
+            stompClient.send('/app/setNumber', {}, JSON.stringify({
+                sessionId: sessionId,
+                number: number,
+                roomCode: roomCode
+            }));
+        }, 1000);
 
     }
 
