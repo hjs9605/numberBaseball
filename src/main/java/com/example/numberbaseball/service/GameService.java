@@ -106,20 +106,9 @@ public class GameService {
 			BaseBallNumber tmpNumber = numberGuessDTO.getNumber();
 			int[] score = compare(targetNumber, tmpNumber);
 
-			messagingTemplate.convertAndSend(
-				"/topic/score/"+roomCode,
-				new NumberScoreDTO(sessionId, user.getUserName(), tmpNumber.getNumber(), score)
-			);
-
-			messagingTemplate.convertAndSendToUser(
-				counterUser.getSessionId(), "/topic/turnNow",
-				new Message(counterUser.getUserName()  + "님의 차례입니다."), createHeaders(counterUser.getSessionId())
-			);
-			messagingTemplate.convertAndSendToUser(
-				user.getSessionId(), "/topic/turnNotNow",
-				new Message(counterUser.getUserName()  + "님의 차례입니다."), createHeaders(user.getSessionId())
-			);
-
+			messageService.sendGuessResultMessage(user,roomCode, tmpNumber.getNumber(), score);
+			messageService.sendYourTurnMessage(counterUser);
+			messageService.sendNotYourTurnMessage(user, counterUser);
 		} catch (Exception e) {
 			messagingTemplate.convertAndSendToUser(
 				sessionId, "/topic/errors",
