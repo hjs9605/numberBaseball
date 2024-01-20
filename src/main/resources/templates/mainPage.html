@@ -24,7 +24,7 @@
         // AJAX GET 요청 보내기
         $.ajax({
             type: "GET",
-            url: `http://localhost:${ports}/api/createRoom`,// 실제 서버의 GET Mapping 경로로 대체
+            url: `http://${host}:${ports}/api/createRoom`,// 실제 서버의 GET Mapping 경로로 대체
             success: function (data) {
                 // 성공적으로 응답을 받았을 때의 처리
                 console.log("Response:", data);
