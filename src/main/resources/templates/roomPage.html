@@ -22,7 +22,15 @@
     <input type="text" id="inputField" placeholder="예상하는 숫자를 써주세요!">
     <button id="sendButton" onclick="sendMessage()">Send</button>
 </div>
+<style>
+    .guess-row:nth-child(even) {
+        background-color: #ffffcc; /* 연한 노랑색 배경 설정 */
+    }
 
+    .guess-row:nth-child(odd) {
+        background-color: #ffffff; /* 홀수 행에 대한 배경색 설정 (배경 없음) */
+    }
+</style>
 <div id="guessDisplay">
 
 </div>
@@ -53,7 +61,7 @@
             // 입장처리 후 user 저장, Room status
             enterRoom()
 
-            // game 시작되어서 숫자 설정하는 부분
+            // 방만들고 상대를 기다리는 부분
             var waitingTopic = "/user/topic/waiting/"
             stompClient.subscribe(waitingTopic, function (res) {
                 console.log("--- 기다릴게요  ---" );
@@ -93,8 +101,15 @@
                 console.log(jsonBody4);
 
                 console.log("---추측 결과 보여줌 ---"+jsonBody4.sessionId);
-                document.getElementById("guessDisplay").innerText += jsonBody4.userName + " 님의 결과 :::  " + jsonBody4.guessNumber + " ----->" + jsonBody4.str +
-                    "  STRIKE  " + jsonBody4.ball + "  BALL  " + jsonBody4.out + "  OUT\n";
+                // document.getElementById("guessDisplay").innerText += jsonBody4.userName + " 님의 결과 :::  " + jsonBody4.guessNumber + " ----->" + jsonBody4.str +
+                //     "  STRIKE  " + jsonBody4.ball + "  BALL  " + jsonBody4.out + "  OUT\n";
+                var guessRow = document.createElement('div');
+                guessRow.className = 'guess-row';
+                guessRow.innerText = jsonBody4.userName + " 님의 결과 :::  " + jsonBody4.guessNumber + " ----->" + jsonBody4.str +
+                    "  STRIKE  " + jsonBody4.ball + "  BALL  " + jsonBody4.out + "  OUT";
+
+                // 새로운 추측 행을 guessDisplay 엘리먼트에 추가합니다
+                document.getElementById("guessDisplay").appendChild(guessRow);
 
             });
 
