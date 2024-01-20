@@ -1,10 +1,7 @@
 package com.example.numberbaseball.domain;
 
 import com.example.numberbaseball.Enum.RoomStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.ArrayList;
