@@ -9,6 +9,8 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.numberbaseball.Enum.RoomStatus;
+import com.example.numberbaseball.dto.Message;
+import com.example.numberbaseball.dto.UserResponseDTO;
 
 import lombok.RequiredArgsConstructor;
 
@@ -19,9 +21,15 @@ public class MessageService {
 	private final SimpMessagingTemplate messagingTemplate;
 
 
-	public void message1(String receiverSessionId, RoomStatus roomStatus){
+	public void sendWaitMessage(String receiverSessionId, RoomStatus roomStatus){
 		messagingTemplate.convertAndSendToUser(receiverSessionId,
 			"/topic/waiting/", roomStatus, createHeaders(receiverSessionId)
+		);
+	}
+
+	public void sendGameStartMessage(String receiverSessionId, UserResponseDTO userResponseDTO){
+		messagingTemplate.convertAndSendToUser(receiverSessionId,
+			"/topic/startGame", userResponseDTO, createHeaders(receiverSessionId)
 		);
 	}
 
@@ -30,5 +38,9 @@ public class MessageService {
 		if (sessionId != null) headerAccessor.setSessionId(sessionId);
 		headerAccessor.setLeaveMutable(true);
 		return headerAccessor.getMessageHeaders();
+	}
+
+	public void sendCounterUserEnteredRoomMessage(String receiverSessionId, String incomingUserName) {
+		messagingTemplate.convertAndSendToUser(receiverSessionId, "/topic/greeting", new Message(incomingUserName + "이 입장하셨습니다."), createHeaders(receiverSessionId));
 	}
 }

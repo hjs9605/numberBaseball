@@ -52,23 +52,18 @@ public class GameService {
 
 
 		if(roomStatus.equals(RoomStatus.WAITING)) {
-			messageService.message1(sessionId, roomStatus);
+			messageService.sendWaitMessage(sessionId, roomStatus);
 		}
 		else {
+
 			User counsterUser = room.getUserList().stream().filter( a -> !a.equals(user)).findFirst().orElseThrow(()-> new IllegalArgumentException("User 없음"));
 			String counterSessionId = counsterUser.getSessionId();
+			messageService.sendCounterUserEnteredRoomMessage(counterSessionId, userName);
 
 			UserResponseDTO userResponseDTO = new UserResponseDTO(sessionId, userName, roomCode, roomStatus == RoomStatus.READY);
 			UserResponseDTO counterUserResponseDTO = new UserResponseDTO(counterSessionId, counsterUser.getUserName(), roomCode, roomStatus == RoomStatus.READY);
-			messagingTemplate.convertAndSendToUser(counterSessionId, "/topic/greeting", counterUserResponseDTO, createHeaders(counterSessionId));
-
-			messagingTemplate.convertAndSendToUser(sessionId,
-				"/topic/startGame", userResponseDTO, createHeaders(sessionId)
-			);
-
-			messagingTemplate.convertAndSendToUser(counterSessionId,
-				"/topic/startGame", counterUserResponseDTO, createHeaders(counterSessionId)
-			);
+			messageService.sendGameStartMessage(sessionId, userResponseDTO);
+			messageService.sendGameStartMessage(counterSessionId, counterUserResponseDTO);
 		}
 
 	}
