@@ -16,19 +16,19 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
 <script>
-
+    const ports = "18082"
     var roomCode = null;
 
     $("#createRoom").on("click", function () {
         // AJAX GET 요청 보내기
         $.ajax({
             type: "GET",
-            url: "http://localhost:8080/api/createRoom",// 실제 서버의 GET Mapping 경로로 대체
+            url: `http://localhost:${ports}/api/createRoom`,// 실제 서버의 GET Mapping 경로로 대체
             success: function (data) {
                 // 성공적으로 응답을 받았을 때의 처리
                 console.log("Response:", data);
                 roomCode = data.roomCode;
-                location.replace("http://localhost:8080/room/"+roomCode);
+                location.replace(`http://localhost:${ports}/room/`+roomCode);
             }
         });
     });
@@ -37,12 +37,12 @@
         // AJAX GET 요청 보내기
         $.ajax({
             type: "GET",
-            url: "http://localhost:8080/api/createRoom",// 실제 서버의 GET Mapping 경로로 대체
+            url: `http://localhost:${ports}/api/createRoom`,// 실제 서버의 GET Mapping 경로로 대체
             success: function (data) {
                 // 성공적으로 응답을 받았을 때의 처리
                 console.log("Response:", data);
                 roomCode = data.roomCode;
-                location.replace("http://localhost:8080/room/"+roomCode);
+                location.replace(`http://localhost:${ports}/room/`+roomCode);
             }
         });
     });
@@ -56,12 +56,12 @@
     function joinRoom(roomCode) {
         $.ajax({
             type: "GET",
-            url: "http://localhost:8080/api/joinRoom/"+roomCode,// 실제 서버의 GET Mapping 경로로 대체
+            url: `http://localhost:${ports}/api/joinRoom/`+roomCode,// 실제 서버의 GET Mapping 경로로 대체
             success: function (data) {
                 // 성공적으로 응답을 받았을 때의 처리
                 console.log("Response:", data);
                 roomCode = data.roomCode;
-                location.replace("http://localhost:8080/room/"+roomCode);
+                location.replace(`http://localhost:${ports}/room/`+roomCode);
             }
 
         })
