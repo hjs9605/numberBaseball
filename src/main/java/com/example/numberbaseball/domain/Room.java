@@ -6,6 +6,8 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Getter
 public class Room {
@@ -40,4 +42,24 @@ public class Room {
         this.roomStatus = roomStatus;
     }
 
+    public boolean doAllUsersReady() {
+        return this.userList.stream()
+                .allMatch(User::isReady);
+    }
+
+    public User getRandomUser() {
+        return this.userList.get(0);
+    }
+
+    public User getCounterUser(User user) {
+        Optional<User> counterUser = this.userList.stream()
+                .filter(tmpUser -> !tmpUser.equals(user))
+                .findAny();
+
+        if (counterUser.isEmpty()) {
+           throw new RuntimeException("there is no CounterUser in this Room");
+        }
+
+        return counterUser.get();
+    }
 }

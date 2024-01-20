@@ -23,6 +23,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -46,6 +47,14 @@ public class GameController {
 
 
     }
+
+    @MessageMapping("/readyAll")
+    public void startGame(Principal principal, SimpMessageHeaderAccessor headerAccessor, @Payload StartGameUserDTO startGameUserDTO) {
+        String sessionId = headerAccessor.getSessionId();
+        gameService.startGame(sessionId, startGameUserDTO);
+
+    }
+
     @MessageMapping("/numberGuess")
     public void numberGuess(Principal principal, SimpMessageHeaderAccessor headerAccessor, @Payload NumberGuessDTO numberGuessDTO) {
         String sessionId = headerAccessor.getSessionId();

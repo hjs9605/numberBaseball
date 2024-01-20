@@ -1,5 +1,6 @@
 package com.example.numberbaseball.service;
 
+import com.example.numberbaseball.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.Nullable;
 import org.springframework.messaging.MessageHeaders;
@@ -12,11 +13,6 @@ import com.example.numberbaseball.Enum.RoomStatus;
 import com.example.numberbaseball.domain.Room;
 import com.example.numberbaseball.domain.User;
 import com.example.numberbaseball.domain.UserNumber;
-import com.example.numberbaseball.dto.Message;
-import com.example.numberbaseball.dto.NumberGuessDTO;
-import com.example.numberbaseball.dto.NumberResponseDTO;
-import com.example.numberbaseball.dto.NumberScoreDTO;
-import com.example.numberbaseball.dto.UserResponseDTO;
 import com.example.numberbaseball.repository.NumberRepository;
 import com.example.numberbaseball.repository.RoomRepository;
 import com.example.numberbaseball.repository.UserRepository;
@@ -92,6 +88,25 @@ public class GameService {
 			);
 
 		}
+	}
+
+	public void startGame(String sessionId, StartGameUserDTO startGameUserDTO) {
+
+		User user = userRepository.findBySessionId(sessionId);
+		user.setReady();
+
+		Room room = roomRepository.findByCode(startGameUserDTO.getRoomCode());
+		User counterUser = room.getCounterUser(user);
+		if(room.doAllUsersReady()){
+			User startUser = room.getRandomUser();
+			messageService.sendYourTurnMessage(startUser);
+			User notStartUser = room.getCounterUser(startUser);
+			messageService.sendNotYourTurnMessage(notStartUser,startUser);
+			return;
+		}
+		messageService.sendWaitForCounterUserReady(user, counterUser.getUserName());
+
+
 	}
 
 	public void numberGuess(String sessionId, NumberGuessDTO numberGuessDTO){
